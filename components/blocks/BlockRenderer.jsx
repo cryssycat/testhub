@@ -1,3 +1,20 @@
+export default function BlockRenderer({block,data}){
+
+console.log("BLOCK RECEIVED:", block);
+
+const Component = blocks[block.type];
+
+if(!Component){
+ console.log("NO COMPONENT FOUND:", block.type);
+ return null;
+}
+
+return (
+...
+)
+
+}
+
 import blocks from "./blockRegistry";
 
 
