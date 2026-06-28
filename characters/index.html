@@ -1,52 +1,42 @@
-<BlockRenderer
+<!DOCTYPE html>
+<html lang="en">
+<head>
 
-block={{
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
 
-type:"row",
+  <title>StarHub Characters</title>
 
-children:[
+  <style>
+    body {
+      margin: 0;
+      font-family: system-ui, sans-serif;
+      background: #0b0b10;
+      color: white;
+    }
 
-{
+    #root {
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+    }
 
-type:"header",
+    .loading {
+      padding: 40px;
+      opacity: 0.6;
+    }
+  </style>
 
-props:{
+</head>
 
-name:"Star",
+<body>
 
-avatar:"image.png"
+  <div id="root">
+    <div class="loading">Loading StarHub...</div>
+  </div>
 
-}
+  <!-- IMPORTANT: this must point to your actual entry file -->
+  <script type="module" src="/src/main.jsx"></script>
 
-},
-
-
-{
-
-type:"moodboard",
-
-props:{
-
-images:[
-
-"1.png",
-
-"2.png",
-
-"3.png",
-
-"4.png"
-
-]
-
-}
-
-}
-
-]
-
-}}
-
-data={character}
-
-/>
+</body>
+</html>
