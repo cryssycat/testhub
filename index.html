@@ -248,14 +248,23 @@
     background: rgba(255,255,255,0.5); border-left: 3px solid var(--accent, #6C63FF);
   }
 
-  .gallery-grid{ display:grid; grid-template-columns: repeat(auto-fill, minmax(150px,1fr)); gap: 12px; }
-  .gallery-grid img{
+  .gallery-grid{ display:grid; grid-template-columns: repeat(auto-fill, minmax(150px,1fr)); gap: 16px; }
+  .gallery-item{ display:flex; flex-direction:column; gap: 6px; }
+  .gallery-item img{
     width:100%; aspect-ratio: 1; object-fit: cover; border-radius: var(--radius-sm); cursor: pointer;
     border: 1px solid var(--glass-border);
     transition: transform .15s ease;
   }
-  .gallery-grid img:hover{ transform: scale(1.03); }
+  .gallery-item img:hover{ transform: scale(1.03); }
+  .img-caption{ font-size: 11px; color: var(--ink-soft); text-align: center; line-height: 1.35; }
   .gallery-caption{ font-size: 13px; color: var(--ink-soft); margin-bottom: 14px; }
+
+  .value-pill{
+    display:inline-flex; align-items:center; gap: 5px; margin-top:12px; margin-left: 8px;
+    font-family: var(--font-mono); font-size: 11px; letter-spacing:.04em;
+    padding: 5px 12px; border-radius: 999px;
+    background: rgba(47,158,110,0.12); color: #1F8A5C; border: 1px solid rgba(47,158,110,0.35);
+  }
 
   .nsfw-warning{
     border: 1px dashed var(--accent, #6C63FF); border-radius: var(--radius-sm);
@@ -353,7 +362,7 @@
 /* ============================================================
    SET YOUR WORKER URL HERE
    ============================================================ */
-const API_BASE = "https://silent-hill-f680.crysthigpen.workers.dev"
+const API_BASE = "https://YOUR-WORKER-SUBDOMAIN.workers.dev";
 
 const app = document.getElementById("app");
 const topNav = document.getElementById("topNav");
@@ -465,9 +474,21 @@ async function renderLanding(){
 }
 
 /* ---------------- Character page ---------------- */
+const CHAR_TABS = [
+  { id: "profile", label: "Profile", types: ["Profile Info","Likes","Dislikes","Hobbies","Appearances","Backstory","Trivia","Quotes","Relationships","Voice & Playlist"] },
+  { id: "gallery", label: "Gallery", types: ["Gallery"] },
+  { id: "nsfw", label: "NSFW Gallery", types: ["NSFW Gallery"] },
+  { id: "au", label: "AU Galleries", types: ["AU Gallery 1", "AU Gallery 2", "AU Gallery 3"] },
+];
+
+// Holds the raw block data for any NSFW galleries on the current character page,
+// so the reveal button can look up images/captions without re-escaping JSON into HTML.
+let nsfwRegistry = [];
+
 async function renderCharacter(slug){
   if(!slug){ app.innerHTML = `<p class="error-state">Missing character.</p>`; return; }
   app.innerHTML = `<p class="loading">Opening the file…</p>`;
+  nsfwRegistry = [];
 
   try{
     let data = cache.chars.get(slug);
@@ -477,6 +498,10 @@ async function renderCharacter(slug){
     }
 
     const accent = accentHex(data.accentColor);
+    const valuePill = data.totalValue > 0
+      ? `<span class="value-pill">$${data.totalValue.toFixed(2)}</span>`
+      : "";
+
     app.innerHTML = `
       <a class="back-link" href="#/">&larr; Back to the archive</a>
       <div class="char-hero" style="--accent:${accent}">
@@ -485,19 +510,48 @@ async function renderCharacter(slug){
           <h1>${escapeHtml(data.name)}</h1>
           ${data.tagline ? `<div class="tagline">${escapeHtml(data.tagline)}</div>` : ""}
           <span class="folder-pill">${escapeHtml(data.folder)}</span>
+          ${valuePill}
         </div>
       </div>
-      <div id="blocks" style="--accent:${accent}"></div>
+      <div id="charTabs" class="drawers"></div>
+      <div id="tabPanels" style="--accent:${accent}"></div>
     `;
 
-    const blocksEl = document.getElementById("blocks");
-    if(data.blocks.length === 0){
-      blocksEl.innerHTML = `<p class="empty-state">No blocks filed for this character yet.</p>`;
-    } else {
-      blocksEl.innerHTML = data.blocks.map(renderBlock).join("");
-      wireGalleryClicks(blocksEl);
-      wireNsfwWarnings(blocksEl);
+    const tabsEl = document.getElementById("charTabs");
+    const panelsEl = document.getElementById("tabPanels");
+
+    const tabsWithContent = CHAR_TABS
+      .map(tab => ({ ...tab, blocks: data.blocks.filter(b => tab.types.includes(b.type)) }))
+      .filter(tab => tab.blocks.length > 0);
+
+    if(tabsWithContent.length === 0){
+      tabsEl.remove();
+      panelsEl.innerHTML = `<p class="empty-state">No blocks filed for this character yet.</p>`;
+      return;
     }
+
+    tabsEl.innerHTML = tabsWithContent.map((tab, i) =>
+      `<button class="drawer-tab ${i===0 ? "active":""}" data-tab="${tab.id}">${escapeHtml(tab.label)}</button>`
+    ).join("");
+
+    panelsEl.innerHTML = tabsWithContent.map((tab, i) => `
+      <div class="tab-panel" data-panel="${tab.id}" ${i===0 ? "" : "hidden"}>
+        ${tab.blocks.map(renderBlock).join("")}
+      </div>
+    `).join("");
+
+    wireGalleryClicks(panelsEl);
+    wireNsfwWarnings(panelsEl);
+
+    tabsEl.addEventListener("click", (e) => {
+      const btn = e.target.closest(".drawer-tab");
+      if(!btn) return;
+      tabsEl.querySelectorAll(".drawer-tab").forEach(b => b.classList.remove("active"));
+      btn.classList.add("active");
+      panelsEl.querySelectorAll(".tab-panel").forEach(panel => {
+        panel.hidden = panel.dataset.panel !== btn.dataset.tab;
+      });
+    });
   } catch(err){
     app.innerHTML = `<p class="error-state">Couldn't open that file: ${escapeHtml(err.message)}</p>`;
   }
@@ -535,22 +589,34 @@ function renderBlock(block){
               </div>
             </a>`).join("")}
         </div>`);
-    case "NSFW Gallery":
+    case "NSFW Gallery": {
+      const idx = nsfwRegistry.push(block) - 1;
       return section("NSFW Gallery", `
-        <div class="nsfw-warning" data-images='${JSON.stringify(block.images)}' data-caption="${escapeHtml(block.caption || "")}">
+        <div class="nsfw-warning" data-idx="${idx}">
           <p>This block contains NSFW content.</p>
           <button class="btn reveal-nsfw">Show anyway</button>
         </div>`);
+    }
     case "Gallery":
     case "AU Gallery 1":
     case "AU Gallery 2":
     case "AU Gallery 3":
-      return section(block.type, `
-        ${block.caption ? `<div class="gallery-caption">${escapeHtml(block.caption)}</div>` : ""}
-        <div class="gallery-grid">${block.images.map(src => `<img src="${escapeHtml(src)}" loading="lazy">`).join("")}</div>`);
+      return section(block.type, renderGalleryGrid(block));
     default:
       return section(block.type, `<div class="prose">${escapeHtml(block.text || "")}</div>`);
   }
+}
+
+function renderGalleryGrid(block){
+  return `
+    ${block.caption ? `<div class="gallery-caption">${escapeHtml(block.caption)}</div>` : ""}
+    <div class="gallery-grid">
+      ${block.images.map(img => `
+        <div class="gallery-item">
+          <img src="${escapeHtml(img.url)}" loading="lazy">
+          ${img.caption ? `<div class="img-caption">${escapeHtml(img.caption)}</div>` : ""}
+        </div>`).join("")}
+    </div>`;
 }
 
 function section(title, inner){
@@ -558,7 +624,7 @@ function section(title, inner){
 }
 
 function wireGalleryClicks(root){
-  root.querySelectorAll(".gallery-grid img").forEach(img => {
+  root.querySelectorAll(".gallery-item img").forEach(img => {
     img.addEventListener("click", () => openLightbox(img.src));
   });
 }
@@ -567,11 +633,8 @@ function wireNsfwWarnings(root){
   root.querySelectorAll(".nsfw-warning").forEach(box => {
     const btn = box.querySelector(".reveal-nsfw");
     btn.addEventListener("click", () => {
-      const images = JSON.parse(box.dataset.images || "[]");
-      const caption = box.dataset.caption;
-      box.outerHTML = `
-        ${caption ? `<div class="gallery-caption">${escapeHtml(caption)}</div>` : ""}
-        <div class="gallery-grid">${images.map(src => `<img src="${escapeHtml(src)}" loading="lazy">`).join("")}</div>`;
+      const block = nsfwRegistry[Number(box.dataset.idx)];
+      box.outerHTML = renderGalleryGrid(block);
       wireGalleryClicks(root);
     }, { once: true });
   });
