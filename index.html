@@ -1,0 +1,595 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Character Archive</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,400;0,9..144,600;0,9..144,700;1,9..144,500&family=Work+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+  /* ============================================================
+     CONFIG — the one thing you actually need to edit to go live
+     ============================================================ */
+  /* Set this to your deployed Cloudflare Worker URL, e.g.
+     "https://character-hub.YOURNAME.workers.dev" */
+
+  :root{
+    /* ---- design tokens ---- */
+    --parchment: #F4EEE0;
+    --parchment-deep: #ECE3D0;
+    --ink: #2B2740;
+    --ink-soft: #5B5470;
+    --rose: #C97B84;
+    --sage: #8A9B7E;
+    --gold: #C9A227;
+    --sky: #7C93A8;
+    --card-shadow: 0 1px 0 rgba(43,39,64,0.08), 0 8px 20px -12px rgba(43,39,64,0.35);
+    --radius: 3px;
+    --font-display: "Fraunces", serif;
+    --font-body: "Work Sans", sans-serif;
+    --font-mono: "IBM Plex Mono", monospace;
+  }
+
+  *{ box-sizing: border-box; }
+  html{ scroll-behavior: smooth; }
+  body{
+    margin:0;
+    background: var(--parchment);
+    background-image:
+      radial-gradient(circle at 1px 1px, rgba(43,39,64,0.05) 1px, transparent 0);
+    background-size: 22px 22px;
+    color: var(--ink);
+    font-family: var(--font-body);
+    -webkit-font-smoothing: antialiased;
+  }
+  a{ color: inherit; text-decoration: none; }
+  ::selection{ background: var(--rose); color: var(--parchment); }
+  @media (prefers-reduced-motion: reduce){
+    *{ animation-duration: 0.001ms !important; transition-duration: 0.001ms !important; }
+  }
+
+  /* ---------------- Top nav ---------------- */
+  .topbar{
+    position: sticky; top:0; z-index: 40;
+    display:flex; align-items:center; justify-content:space-between;
+    padding: 18px 32px;
+    background: rgba(244,238,224,0.88);
+    backdrop-filter: blur(6px);
+    border-bottom: 1px solid rgba(43,39,64,0.12);
+  }
+  .brand{
+    font-family: var(--font-display);
+    font-weight: 700;
+    font-size: 22px;
+    letter-spacing: 0.01em;
+  }
+  .brand small{
+    display:block;
+    font-family: var(--font-mono);
+    font-size: 10px;
+    letter-spacing: 0.16em;
+    text-transform: uppercase;
+    color: var(--ink-soft);
+    font-weight: 400;
+  }
+  nav.top-links{ display:flex; gap: 28px; }
+  nav.top-links a{
+    font-family: var(--font-mono);
+    font-size: 12px;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--ink-soft);
+    padding-bottom: 3px;
+    border-bottom: 1px solid transparent;
+    transition: border-color .15s ease, color .15s ease;
+  }
+  nav.top-links a:hover, nav.top-links a.active{
+    color: var(--ink);
+    border-bottom-color: var(--rose);
+  }
+
+  main{ max-width: 1120px; margin: 0 auto; padding: 40px 32px 100px; }
+
+  /* ---------------- Landing: drawer tabs ---------------- */
+  .archive-head{ margin-bottom: 28px; }
+  .archive-head h1{
+    font-family: var(--font-display);
+    font-size: clamp(32px, 5vw, 48px);
+    font-weight: 600;
+    margin: 0 0 6px;
+  }
+  .archive-head p{ color: var(--ink-soft); margin: 0; max-width: 60ch; }
+
+  .drawers{
+    display:flex; flex-wrap: wrap; gap: 10px;
+    margin: 28px 0 32px;
+    border-bottom: 1px solid rgba(43,39,64,0.15);
+    padding-bottom: 0;
+  }
+  .drawer-tab{
+    font-family: var(--font-mono);
+    font-size: 12px;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    padding: 10px 16px;
+    background: var(--parchment-deep);
+    border: 1px solid rgba(43,39,64,0.15);
+    border-bottom: none;
+    border-radius: var(--radius) var(--radius) 0 0;
+    cursor: pointer;
+    color: var(--ink-soft);
+    position: relative;
+    top: 1px;
+  }
+  .drawer-tab.active{
+    background: var(--parchment);
+    color: var(--ink);
+    border-bottom: 1px solid var(--parchment);
+  }
+  .drawer-tab .count{ opacity: .55; margin-left: 4px; }
+
+  .card-grid{
+    display:grid;
+    grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+    gap: 22px;
+  }
+  .char-card{
+    display:block;
+    background: #fff;
+    border-radius: var(--radius);
+    box-shadow: var(--card-shadow);
+    padding: 10px 10px 14px;
+    transform: rotate(var(--tilt, 0deg));
+    transition: transform .18s ease, box-shadow .18s ease;
+  }
+  .char-card:hover{
+    transform: rotate(0deg) translateY(-4px);
+    box-shadow: 0 2px 0 rgba(43,39,64,0.1), 0 16px 30px -14px rgba(43,39,64,0.45);
+  }
+  .char-card .photo{
+    position: relative;
+    aspect-ratio: 4/5;
+    overflow:hidden;
+    background: var(--parchment-deep);
+    border-radius: 2px;
+  }
+  .char-card .photo img{ width:100%; height:100%; object-fit: cover; display:block; }
+  .char-card .photo::after{
+    content:"";
+    position:absolute; inset:0;
+    box-shadow: inset 0 0 0 1px rgba(43,39,64,0.08);
+  }
+  .char-card .corner{
+    position:absolute; width:26px; height:26px; top:-2px; left:-2px;
+    background: linear-gradient(135deg, rgba(255,255,255,.85) 48%, transparent 50%);
+    filter: drop-shadow(0 1px 1px rgba(0,0,0,.15));
+  }
+  .char-card .meta{ padding-top: 10px; }
+  .char-card .meta .name{
+    font-family: var(--font-display);
+    font-weight: 600;
+    font-size: 17px;
+    line-height: 1.2;
+  }
+  .char-card .meta .tag{
+    font-size: 12px; color: var(--ink-soft); margin-top: 2px;
+  }
+  .empty-state{
+    font-family: var(--font-mono); font-size: 13px; color: var(--ink-soft);
+    padding: 40px 0;
+  }
+
+  /* ---------------- Character page ---------------- */
+  .char-hero{
+    display:flex; gap: 32px; align-items:flex-end; flex-wrap: wrap;
+    margin-bottom: 40px; padding-bottom: 28px;
+    border-bottom: 2px solid var(--accent, var(--rose));
+  }
+  .char-hero .portrait{
+    width: 190px; aspect-ratio: 4/5; border-radius: 2px; overflow:hidden;
+    box-shadow: var(--card-shadow); flex-shrink:0; background: var(--parchment-deep);
+  }
+  .char-hero .portrait img{ width:100%; height:100%; object-fit:cover; }
+  .char-hero h1{
+    font-family: var(--font-display); font-size: clamp(30px,4vw,44px);
+    font-weight: 700; margin: 0 0 4px;
+  }
+  .char-hero .tagline{ font-style: italic; color: var(--ink-soft); font-size: 16px; }
+  .char-hero .folder-pill{
+    display:inline-block; margin-top:10px;
+    font-family: var(--font-mono); font-size: 11px; letter-spacing:.08em; text-transform:uppercase;
+    padding: 4px 10px; border-radius: 20px; border:1px solid var(--accent, var(--rose)); color: var(--accent, var(--rose));
+  }
+
+  .block{ margin-bottom: 44px; }
+  .block h2{
+    font-family: var(--font-mono); font-size: 12px; letter-spacing: 0.12em; text-transform: uppercase;
+    color: var(--accent, var(--rose)); margin: 0 0 14px;
+    display:flex; align-items:center; gap: 10px;
+  }
+  .block h2::after{ content:""; flex:1; height:1px; background: rgba(43,39,64,0.15); }
+
+  .kv-grid{ display:grid; grid-template-columns: repeat(auto-fill, minmax(180px,1fr)); gap: 14px 26px; }
+  .kv-grid .item .k{ font-family: var(--font-mono); font-size: 10px; text-transform:uppercase; letter-spacing:.08em; color: var(--ink-soft); }
+  .kv-grid .item .v{ font-size: 16px; margin-top: 2px; }
+
+  .chip-list{ display:flex; flex-wrap:wrap; gap: 8px; }
+  .chip-list .chip{
+    background: #fff; border:1px solid rgba(43,39,64,0.15); border-radius: 20px;
+    padding: 6px 14px; font-size: 13px;
+  }
+
+  .prose{ max-width: 68ch; line-height: 1.7; font-size: 16px; }
+
+  .quote-list{ display:flex; flex-direction:column; gap: 10px; }
+  .quote-list .q{ font-family: var(--font-display); font-style: italic; font-size: 18px; padding-left: 16px; border-left: 2px solid var(--accent, var(--rose)); }
+
+  .gallery-grid{ display:grid; grid-template-columns: repeat(auto-fill, minmax(150px,1fr)); gap: 12px; }
+  .gallery-grid img{
+    width:100%; aspect-ratio: 1; object-fit: cover; border-radius: 2px; cursor: pointer;
+    box-shadow: var(--card-shadow);
+  }
+  .gallery-caption{ font-size: 13px; color: var(--ink-soft); margin-bottom: 12px; }
+
+  .nsfw-warning{
+    border: 1px dashed var(--accent, var(--rose)); border-radius: var(--radius);
+    padding: 28px; text-align:center; background: rgba(201,123,132,0.06);
+  }
+  .nsfw-warning p{ margin: 0 0 14px; color: var(--ink-soft); font-size: 14px; }
+  .btn{
+    font-family: var(--font-mono); font-size: 12px; letter-spacing:.06em; text-transform:uppercase;
+    background: var(--ink); color: var(--parchment); border:none; padding: 10px 20px;
+    border-radius: 2px; cursor:pointer;
+  }
+  .btn:hover{ background: var(--rose); }
+
+  .relationship-grid{ display:grid; grid-template-columns: repeat(auto-fill, minmax(160px,1fr)); gap: 16px; }
+  .rel-card{ background:#fff; border-radius: var(--radius); box-shadow: var(--card-shadow); overflow:hidden; }
+  .rel-card .photo{ aspect-ratio: 4/5; background: var(--parchment-deep); }
+  .rel-card .photo img{ width:100%; height:100%; object-fit:cover; display:block; }
+  .rel-card .meta{ padding: 8px 10px 12px; }
+  .rel-card .meta .name{ font-family: var(--font-display); font-weight:600; font-size:15px; }
+  .rel-card .meta .label{ font-family: var(--font-mono); font-size: 10px; text-transform:uppercase; letter-spacing:.06em; color: var(--accent, var(--rose)); margin-top:2px; }
+
+  /* ---------------- Static pages ---------------- */
+  .static-page h1{
+    font-family: var(--font-display); font-size: clamp(30px,4vw,44px); margin: 0 0 24px;
+  }
+  .static-page .prose{ max-width: 74ch; }
+  .static-page .prose h2{
+    font-family: var(--font-display); font-size: 22px; margin: 32px 0 10px;
+  }
+  .static-page .prose ul{ padding-left: 20px; line-height:1.8; }
+
+  /* ---------------- Lightbox ---------------- */
+  .lightbox{
+    position: fixed; inset:0; background: rgba(43,39,64,0.92); z-index: 100;
+    display:flex; align-items:center; justify-content:center; padding: 40px;
+    cursor: zoom-out;
+  }
+  .lightbox img{ max-width:100%; max-height:100%; box-shadow: 0 20px 60px rgba(0,0,0,.5); }
+
+  .back-link{
+    display:inline-flex; align-items:center; gap:6px;
+    font-family: var(--font-mono); font-size: 12px; text-transform:uppercase; letter-spacing:.06em;
+    color: var(--ink-soft); margin-bottom: 24px;
+  }
+  .back-link:hover{ color: var(--rose); }
+
+  .loading, .error-state{
+    font-family: var(--font-mono); font-size: 13px; color: var(--ink-soft); padding: 60px 0; text-align:center;
+  }
+
+  footer{
+    text-align:center; padding: 32px; font-family: var(--font-mono); font-size: 11px;
+    color: var(--ink-soft); letter-spacing: .06em;
+  }
+</style>
+</head>
+<body>
+
+<div class="topbar">
+  <a href="#/" class="brand">Character Archive<small>Living Index</small></a>
+  <nav class="top-links" id="topNav">
+    <a href="#/">Home</a>
+    <a href="#/rp-rules">RP Rules</a>
+    <a href="#/meet-the-owner">Meet the Owner</a>
+  </nav>
+</div>
+
+<main id="app"></main>
+
+<footer>maintained by hand &middot; last dusted off recently</footer>
+
+<script>
+/* ============================================================
+   SET YOUR WORKER URL HERE
+   ============================================================ */
+const API_BASE = "https://YOUR-WORKER-SUBDOMAIN.workers.dev";
+
+const app = document.getElementById("app");
+const topNav = document.getElementById("topNav");
+
+// simple cache so navigating back doesn't re-fetch every time
+const cache = { characters: null, chars: new Map() };
+
+function escapeHtml(str){
+  return String(str).replace(/[&<>"']/g, (c) => ({
+    "&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"
+  }[c]));
+}
+
+function accentHex(name){
+  return { Rose:"#C97B84", Sage:"#8A9B7E", Gold:"#C9A227", Ink:"#2B2740", Sky:"#7C93A8" }[name] || "#C97B84";
+}
+
+async function apiGet(path){
+  const res = await fetch(`${API_BASE}${path}`);
+  if(!res.ok) throw new Error(`Request failed (${res.status})`);
+  return res.json();
+}
+
+/* ---------------- Router ---------------- */
+function router(){
+  const hash = location.hash.replace(/^#\/?/, "");
+  const [route, query] = hash.split("?");
+  const params = new URLSearchParams(query || "");
+
+  document.querySelectorAll("#topNav a").forEach(a => a.classList.remove("active"));
+
+  if(!route){
+    document.querySelector('#topNav a[href="#/"]').classList.add("active");
+    renderLanding();
+  } else if(route === "rp-rules"){
+    document.querySelector('#topNav a[href="#/rp-rules"]').classList.add("active");
+    renderRpRules();
+  } else if(route === "meet-the-owner"){
+    document.querySelector('#topNav a[href="#/meet-the-owner"]').classList.add("active");
+    renderMeetOwner();
+  } else if(route === "character"){
+    renderCharacter(params.get("slug"));
+  } else {
+    app.innerHTML = `<p class="error-state">Page not found.</p>`;
+  }
+  window.scrollTo(0,0);
+}
+window.addEventListener("hashchange", router);
+
+/* ---------------- Landing page ---------------- */
+async function renderLanding(){
+  app.innerHTML = `
+    <div class="archive-head">
+      <h1>The Archive</h1>
+      <p>Every character, sorted into their drawer. Click a card to open the full file.</p>
+    </div>
+    <div id="drawers" class="drawers"></div>
+    <div id="cardGrid" class="loading">Pulling files from the drawers…</div>
+  `;
+
+  try{
+    if(!cache.characters){
+      cache.characters = await apiGet("/api/characters");
+    }
+    const chars = cache.characters;
+
+    const folders = ["All", ...Array.from(new Set(chars.map(c => c.folder)))];
+    const drawers = document.getElementById("drawers");
+    drawers.innerHTML = folders.map((f,i) => {
+      const count = f === "All" ? chars.length : chars.filter(c => c.folder === f).length;
+      return `<button class="drawer-tab ${i===0 ? "active":""}" data-folder="${escapeHtml(f)}">${escapeHtml(f)} <span class="count">${count}</span></button>`;
+    }).join("");
+
+    function paintGrid(folder){
+      const list = folder === "All" ? chars : chars.filter(c => c.folder === folder);
+      const grid = document.getElementById("cardGrid");
+      grid.className = "card-grid";
+      if(list.length === 0){
+        grid.className = "";
+        grid.innerHTML = `<p class="empty-state">Nothing filed here yet.</p>`;
+        return;
+      }
+      grid.innerHTML = list.map((c, i) => {
+        const tilt = (i % 5 - 2) * 0.6;
+        return `
+        <a class="char-card" style="--tilt:${tilt}deg" href="#/character?slug=${encodeURIComponent(c.slug)}">
+          <div class="photo">
+            ${c.cardImage ? `<img src="${escapeHtml(c.cardImage)}" alt="${escapeHtml(c.name)}" loading="lazy">` : ""}
+            <div class="corner"></div>
+          </div>
+          <div class="meta">
+            <div class="name">${escapeHtml(c.name)}</div>
+            ${c.tagline ? `<div class="tag">${escapeHtml(c.tagline)}</div>` : ""}
+          </div>
+        </a>`;
+      }).join("");
+    }
+
+    drawers.addEventListener("click", (e) => {
+      const btn = e.target.closest(".drawer-tab");
+      if(!btn) return;
+      drawers.querySelectorAll(".drawer-tab").forEach(b => b.classList.remove("active"));
+      btn.classList.add("active");
+      paintGrid(btn.dataset.folder);
+    });
+
+    paintGrid("All");
+  } catch(err){
+    document.getElementById("cardGrid").outerHTML = `<p class="error-state">Couldn't reach the archive: ${escapeHtml(err.message)}</p>`;
+  }
+}
+
+/* ---------------- Character page ---------------- */
+async function renderCharacter(slug){
+  if(!slug){ app.innerHTML = `<p class="error-state">Missing character.</p>`; return; }
+  app.innerHTML = `<p class="loading">Opening the file…</p>`;
+
+  try{
+    let data = cache.chars.get(slug);
+    if(!data){
+      data = await apiGet(`/api/character?slug=${encodeURIComponent(slug)}`);
+      cache.chars.set(slug, data);
+    }
+
+    const accent = accentHex(data.accentColor);
+    app.innerHTML = `
+      <a class="back-link" href="#/">&larr; Back to the archive</a>
+      <div class="char-hero" style="--accent:${accent}">
+        <div class="portrait">${data.cardImage ? `<img src="${escapeHtml(data.cardImage)}" alt="${escapeHtml(data.name)}">` : ""}</div>
+        <div>
+          <h1>${escapeHtml(data.name)}</h1>
+          ${data.tagline ? `<div class="tagline">${escapeHtml(data.tagline)}</div>` : ""}
+          <span class="folder-pill">${escapeHtml(data.folder)}</span>
+        </div>
+      </div>
+      <div id="blocks" style="--accent:${accent}"></div>
+    `;
+
+    const blocksEl = document.getElementById("blocks");
+    if(data.blocks.length === 0){
+      blocksEl.innerHTML = `<p class="empty-state">No blocks filed for this character yet.</p>`;
+    } else {
+      blocksEl.innerHTML = data.blocks.map(renderBlock).join("");
+      wireGalleryClicks(blocksEl);
+      wireNsfwWarnings(blocksEl);
+    }
+  } catch(err){
+    app.innerHTML = `<p class="error-state">Couldn't open that file: ${escapeHtml(err.message)}</p>`;
+  }
+}
+
+function renderBlock(block){
+  switch(block.type){
+    case "Profile Info":
+      return section("Profile", `
+        <div class="kv-grid">
+          ${block.fields.map(f => `<div class="item"><div class="k">${escapeHtml(f.key || "—")}</div><div class="v">${escapeHtml(f.value)}</div></div>`).join("")}
+        </div>`);
+    case "Likes":
+    case "Dislikes":
+    case "Hobbies":
+    case "Trivia":
+      return section(block.type, `
+        <div class="chip-list">${block.items.map(i => `<span class="chip">${escapeHtml(i)}</span>`).join("")}</div>`);
+    case "Quotes":
+      return section("Quotes", `
+        <div class="quote-list">${block.items.map(q => `<div class="q">"${escapeHtml(q)}"</div>`).join("")}</div>`);
+    case "Appearances":
+    case "Backstory":
+    case "Voice & Playlist":
+      return section(block.type, `<div class="prose">${escapeHtml(block.text).replace(/\n/g,"<br>")}</div>`);
+    case "Relationships":
+      return section("Relationships", `
+        <div class="relationship-grid">
+          ${block.relationships.map(r => `
+            <a class="rel-card" href="#/character?slug=${encodeURIComponent(r.slug)}">
+              <div class="photo">${r.cardImage ? `<img src="${escapeHtml(r.cardImage)}" alt="${escapeHtml(r.name)}">` : ""}</div>
+              <div class="meta">
+                <div class="name">${escapeHtml(r.name)}</div>
+                <div class="label">${escapeHtml(r.label)}</div>
+              </div>
+            </a>`).join("")}
+        </div>`);
+    case "NSFW Gallery":
+      return section("NSFW Gallery", `
+        <div class="nsfw-warning" data-images='${JSON.stringify(block.images)}' data-caption="${escapeHtml(block.caption || "")}">
+          <p>This block contains NSFW content.</p>
+          <button class="btn reveal-nsfw">Show anyway</button>
+        </div>`);
+    case "Gallery":
+    case "AU Gallery 1":
+    case "AU Gallery 2":
+    case "AU Gallery 3":
+      return section(block.type, `
+        ${block.caption ? `<div class="gallery-caption">${escapeHtml(block.caption)}</div>` : ""}
+        <div class="gallery-grid">${block.images.map(src => `<img src="${escapeHtml(src)}" loading="lazy">`).join("")}</div>`);
+    default:
+      return section(block.type, `<div class="prose">${escapeHtml(block.text || "")}</div>`);
+  }
+}
+
+function section(title, inner){
+  return `<div class="block"><h2>${escapeHtml(title)}</h2>${inner}</div>`;
+}
+
+function wireGalleryClicks(root){
+  root.querySelectorAll(".gallery-grid img").forEach(img => {
+    img.addEventListener("click", () => openLightbox(img.src));
+  });
+}
+
+function wireNsfwWarnings(root){
+  root.querySelectorAll(".nsfw-warning").forEach(box => {
+    const btn = box.querySelector(".reveal-nsfw");
+    btn.addEventListener("click", () => {
+      const images = JSON.parse(box.dataset.images || "[]");
+      const caption = box.dataset.caption;
+      box.outerHTML = `
+        ${caption ? `<div class="gallery-caption">${escapeHtml(caption)}</div>` : ""}
+        <div class="gallery-grid">${images.map(src => `<img src="${escapeHtml(src)}" loading="lazy">`).join("")}</div>`;
+      wireGalleryClicks(root);
+    }, { once: true });
+  });
+}
+
+function openLightbox(src){
+  const box = document.createElement("div");
+  box.className = "lightbox";
+  box.innerHTML = `<img src="${src}">`;
+  box.addEventListener("click", () => box.remove());
+  document.body.appendChild(box);
+}
+
+/* ---------------- Static: RP Rules ----------------
+   Edit the HTML inside .prose below directly to update your rules. */
+function renderRpRules(){
+  app.innerHTML = `
+    <div class="static-page">
+      <a class="back-link" href="#/">&larr; Back to the archive</a>
+      <h1>RP Rules</h1>
+      <div class="prose">
+        <h2>General</h2>
+        <ul>
+          <li>Be respectful out of character, always.</li>
+          <li>Ask before starting ships, major plot events, or character death.</li>
+          <li>Fade to black for anything NSFW unless pre-arranged.</li>
+        </ul>
+
+        <h2>Characters</h2>
+        <ul>
+          <li>Characters here are mine unless stated otherwise — ask before writing them in your own fics/art.</li>
+          <li>AUs are separate continuities. Don't assume AU canon carries over to main canon.</li>
+        </ul>
+
+        <h2>Boundaries</h2>
+        <ul>
+          <li>DNI list and hard limits available on request.</li>
+          <li>I reserve the right to drop a thread that isn't working for me.</li>
+        </ul>
+      </div>
+    </div>
+  `;
+}
+
+/* ---------------- Static: Meet the Owner ----------------
+   Edit the HTML inside .prose below directly. */
+function renderMeetOwner(){
+  app.innerHTML = `
+    <div class="static-page">
+      <a class="back-link" href="#/">&larr; Back to the archive</a>
+      <h1>Meet the Owner</h1>
+      <div class="prose">
+        <p>Hi, I'm Crys — welcome to the archive. This is where all my characters, their lore, and their relationships live.</p>
+        <h2>Find me elsewhere</h2>
+        <ul>
+          <li>Twitter/X: @yourhandle</li>
+          <li>Discord: yourhandle</li>
+        </ul>
+      </div>
+    </div>
+  `;
+}
+
+router();
+</script>
+</body>
+</html>
