@@ -69,6 +69,8 @@
     border: 1px solid var(--glass-border);
     border-radius: var(--radius);
     box-shadow: var(--card-shadow);
+    flex-wrap: wrap;
+    gap: 12px;
   }
   .brand{
     font-family: var(--font-display);
@@ -87,7 +89,7 @@
     font-weight: 400;
     margin-top: 2px;
   }
-  nav.top-links{ display:flex; gap: 8px; }
+  nav.top-links{ display:flex; gap: 8px; flex-wrap: wrap; }
   nav.top-links a{
     font-family: var(--font-body);
     font-size: 13px;
@@ -188,6 +190,45 @@
   .empty-state{
     font-family: var(--font-mono); font-size: 13px; color: var(--ink-soft);
     padding: 40px 0;
+  }
+
+  /* ---------------- Picker (root route) ---------------- */
+  .picker-grid{
+    display:grid;
+    grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+    gap: 20px;
+    max-width: 640px;
+  }
+  .picker-card{
+    display:block;
+    background: var(--glass-strong);
+    backdrop-filter: blur(18px) saturate(140%);
+    -webkit-backdrop-filter: blur(18px) saturate(140%);
+    border: 1px solid var(--glass-border);
+    border-radius: var(--radius);
+    box-shadow: var(--card-shadow);
+    padding: 28px 24px;
+    text-align: center;
+    transition: transform .2s ease, box-shadow .2s ease, border-color .2s ease;
+  }
+  .picker-card:hover{
+    transform: translateY(-6px);
+    box-shadow: 0 20px 40px -16px rgba(0,0,0,0.7);
+    border-color: rgba(199,204,224,0.3);
+  }
+  .picker-card .name{
+    font-family: var(--font-display);
+    font-weight: 700;
+    font-size: 18px;
+    color: var(--ink);
+  }
+  .picker-card .sub{
+    font-family: var(--font-mono);
+    font-size: 11px;
+    letter-spacing: .08em;
+    text-transform: uppercase;
+    color: var(--ink-soft);
+    margin-top: 6px;
   }
 
   /* ---------------- Character page ---------------- */
@@ -356,7 +397,8 @@
 <div class="topbar">
   <a href="#/" class="brand">Character Archive<small>Living Index</small></a>
   <nav class="top-links" id="topNav">
-    <a href="#/">Home</a>
+    <a href="#/luna">Luna Characters</a>
+    <a href="#/star">Star Characters</a>
     <a href="#/rp-rules">RP Rules</a>
     <a href="#/meet-the-owner">Meet the Owner</a>
   </nav>
@@ -374,11 +416,17 @@
    ============================================================ */
 const API_BASE = "https://silent-hill-f680.crysthigpen.workers.dev";
 
+// Maps route keys to page titles. Add more here if you add more DBs/pages later.
+const SOURCES = {
+  luna: { title: "Luna Characters" },
+  star: { title: "Star Characters" },
+};
+
 const app = document.getElementById("app");
 const topNav = document.getElementById("topNav");
 
-// simple cache so navigating back doesn't re-fetch every time
-const cache = { characters: null, chars: new Map() };
+// cache per-source lists so navigating back doesn't re-fetch every time
+const cache = { bySource: {}, chars: new Map() };
 
 function escapeHtml(str){
   return String(str).replace(/[&<>"']/g, (c) => ({
@@ -409,8 +457,10 @@ function router(){
   }
 
   if(!route){
-    document.querySelector('#topNav a[href="#/"]').classList.add("active");
-    renderLanding();
+    renderPicker();
+  } else if(SOURCES[route]){
+    document.querySelector(`#topNav a[href="#/${route}"]`)?.classList.add("active");
+    renderLanding(route, SOURCES[route].title);
   } else if(route === "rp-rules"){
     document.querySelector('#topNav a[href="#/rp-rules"]').classList.add("active");
     renderRpRules();
@@ -426,11 +476,28 @@ function router(){
 }
 window.addEventListener("hashchange", router);
 
-/* ---------------- Landing page ---------------- */
-async function renderLanding(){
+/* ---------------- Root picker ---------------- */
+function renderPicker(){
   app.innerHTML = `
     <div class="archive-head">
       <h1>The Archive</h1>
+      <p>Choose a set of files to open.</p>
+    </div>
+    <div class="picker-grid">
+      ${Object.entries(SOURCES).map(([key, s]) => `
+        <a class="picker-card" href="#/${key}">
+          <div class="name">${escapeHtml(s.title)}</div>
+          <div class="sub">Open drawer</div>
+        </a>`).join("")}
+    </div>
+  `;
+}
+
+/* ---------------- Landing page (per-source) ---------------- */
+async function renderLanding(sourceKey, title){
+  app.innerHTML = `
+    <div class="archive-head">
+      <h1>${escapeHtml(title)}</h1>
       <p>Every character, sorted into their drawer. Click a card to open the full file.</p>
     </div>
     <div id="drawers" class="drawers"></div>
@@ -438,10 +505,10 @@ async function renderLanding(){
   `;
 
   try{
-    if(!cache.characters){
-      cache.characters = await apiGet("/api/characters");
+    if(!cache.bySource[sourceKey]){
+      cache.bySource[sourceKey] = await apiGet(`/api/characters?source=${encodeURIComponent(sourceKey)}`);
     }
-    const chars = cache.characters;
+    const chars = cache.bySource[sourceKey];
 
     const folders = ["All", ...Array.from(new Set(chars.map(c => c.folder)))];
     const drawers = document.getElementById("drawers");
