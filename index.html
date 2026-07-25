@@ -356,13 +356,15 @@
 
 <main id="app"></main>
 
+<style id="charCustomCss"></style>
+
 <footer>maintained by hand &middot; last dusted off recently</footer>
 
 <script>
 /* ============================================================
    SET YOUR WORKER URL HERE
    ============================================================ */
-const API_BASE = "https://silent-hill-f680.crysthigpen.workers.dev";
+const API_BASE = "https://YOUR-WORKER-SUBDOMAIN.workers.dev";
 
 const app = document.getElementById("app");
 const topNav = document.getElementById("topNav");
@@ -393,6 +395,10 @@ function router(){
   const params = new URLSearchParams(query || "");
 
   document.querySelectorAll("#topNav a").forEach(a => a.classList.remove("active"));
+
+  if(route !== "character"){
+    document.getElementById("charCustomCss").textContent = "";
+  }
 
   if(!route){
     document.querySelector('#topNav a[href="#/"]').classList.add("active");
@@ -488,6 +494,7 @@ let nsfwRegistry = [];
 async function renderCharacter(slug){
   if(!slug){ app.innerHTML = `<p class="error-state">Missing character.</p>`; return; }
   app.innerHTML = `<p class="loading">Opening the file…</p>`;
+  document.getElementById("charCustomCss").textContent = ""; // clear the previous character's styles immediately
   nsfwRegistry = [];
 
   try{
@@ -497,12 +504,15 @@ async function renderCharacter(slug){
       cache.chars.set(slug, data);
     }
 
+    document.getElementById("charCustomCss").textContent = data.customCss || "";
+
     const accent = accentHex(data.accentColor);
     const valuePill = data.totalValue > 0
       ? `<span class="value-pill">$${data.totalValue.toFixed(2)}</span>`
       : "";
 
     app.innerHTML = `
+      <div class="character-page">
       <a class="back-link" href="#/">&larr; Back to the archive</a>
       <div class="char-hero" style="--accent:${accent}">
         <div class="portrait">${data.cardImage ? `<img src="${escapeHtml(data.cardImage)}" alt="${escapeHtml(data.name)}">` : ""}</div>
@@ -515,6 +525,7 @@ async function renderCharacter(slug){
       </div>
       <div id="charTabs" class="drawers"></div>
       <div id="tabPanels" style="--accent:${accent}"></div>
+      </div>
     `;
 
     const tabsEl = document.getElementById("charTabs");
