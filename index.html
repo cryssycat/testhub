@@ -104,6 +104,68 @@
 
   main{ max-width: 1120px; margin: 0 auto; padding: 24px 32px 100px; }
 
+  /* ---------------- Profile hero (per-database mini profile) ---------------- */
+  .profile-hero{
+    display:flex; gap: 28px; align-items:center; flex-wrap: wrap;
+    padding: 32px;
+    margin: 24px 0 20px;
+    background: var(--glass-strong);
+    backdrop-filter: blur(20px) saturate(140%);
+    -webkit-backdrop-filter: blur(20px) saturate(140%);
+    border: 1px solid var(--glass-border);
+    border-radius: var(--radius);
+    box-shadow: var(--card-shadow);
+  }
+  .profile-hero .avatar{
+    width: 140px; height: 140px; flex-shrink: 0;
+    border-radius: var(--radius-sm); overflow: hidden;
+    border: 1px solid var(--glass-border);
+    background: rgba(255,255,255,0.03);
+  }
+  .profile-hero .avatar img{ width:100%; height:100%; object-fit: cover; display:block; }
+  .profile-hero .info{ flex: 1; min-width: 240px; }
+  .profile-hero .eyebrow{
+    font-family: var(--font-mono); font-size: 11px; letter-spacing: .14em; text-transform: uppercase;
+    color: var(--accent);
+  }
+  .profile-hero h2{
+    font-family: var(--font-display); font-size: clamp(24px, 4vw, 32px); font-weight: 800;
+    letter-spacing: -0.02em; margin: 4px 0 10px; color: var(--ink);
+  }
+  .profile-hero .welcome{
+    color: var(--ink-soft); font-size: 14px; line-height: 1.65; max-width: 62ch; margin-bottom: 16px;
+  }
+  .profile-links{ display:flex; flex-wrap: wrap; gap: 8px; }
+  .profile-links a{
+    font-family: var(--font-body); font-size: 13px; font-weight: 500;
+    padding: 8px 16px; border-radius: 999px;
+    background: rgba(255,255,255,0.05); border: 1px solid var(--glass-border); color: var(--ink);
+    transition: background .15s ease, border-color .15s ease, color .15s ease;
+  }
+  .profile-links a:hover{ background: var(--accent); color: #0A0C14; border-color: transparent; }
+
+  /* ---------------- Secondary nav grid ---------------- */
+  .nav-section{ margin: 0 0 28px; }
+  .nav-section h3{
+    font-family: var(--font-mono); font-size: 11px; letter-spacing: .1em; text-transform: uppercase;
+    color: var(--ink-soft); margin: 0 0 12px; font-weight: 500;
+  }
+  .nav-grid{
+    display:grid; grid-template-columns: repeat(auto-fill, minmax(170px,1fr)); gap: 12px;
+  }
+  .nav-grid a{
+    display:flex; align-items:center; gap: 8px;
+    padding: 14px 16px;
+    background: var(--glass);
+    backdrop-filter: blur(14px) saturate(140%);
+    -webkit-backdrop-filter: blur(14px) saturate(140%);
+    border: 1px solid var(--glass-border);
+    border-radius: var(--radius-sm);
+    font-size: 14px; font-weight: 500; color: var(--ink);
+    transition: transform .15s ease, border-color .15s ease, background .15s ease;
+  }
+  .nav-grid a:hover{ transform: translateY(-3px); border-color: rgba(199,204,224,0.3); background: var(--glass-strong); }
+
   /* ---------------- Landing ---------------- */
   .archive-head{ margin: 24px 0 28px; }
   .archive-head h1{
@@ -416,10 +478,63 @@
    ============================================================ */
 const API_BASE = "https://silent-hill-f680.crysthigpen.workers.dev";
 
-// Maps route keys to page titles. Add more here if you add more DBs/pages later.
+// Maps route keys to page titles, plus the mini-profile shown at the top of
+// each landing page. Add more here if you add more DBs/pages later.
+//
+// profile.avatar  - full image URL for the little portrait
+// profile.eyebrow - small label above the name (e.g. "CHARACTER ARCHIVE")
+// profile.name    - the big name/title
+// profile.welcome - short paragraph under the name
+// profile.links   - pill buttons under the welcome text (icon is optional,
+//                   any emoji or short text works); href can be an internal
+//                   "#/..." route or an external URL
+// nav             - the secondary "Navigation" grid of link cards below the
+//                   hero; same shape as profile.links, leave empty/omit to
+//                   skip the section entirely
 const SOURCES = {
-  luna: { title: "Luna Characters" },
-  star: { title: "Star Characters" },
+  luna: {
+    title: "Luna Characters",
+    profile: {
+      avatar: "", // e.g. "https://raw.githubusercontent.com/USER/REPO/main/luna-avatar.png"
+      eyebrow: "Character Archive",
+      name: "Luna",
+      welcome: "Welcome to my character hub! Browse characters by folder, search by name or tags, and open individual profiles for references, lore, credits, favorites, and galleries.",
+      links: [
+        { icon: "⭐", label: "Characters", href: "#/luna" },
+        { icon: "🎨", label: "Designs", href: "#" },
+        { icon: "📖", label: "Lore", href: "#" },
+        { icon: "🌎", label: "Worlds", href: "#" },
+      ],
+    },
+    nav: [
+      { icon: "🌎", label: "Worlds", href: "#" },
+      { icon: "💞", label: "Shared Hub", href: "#" },
+    ],
+  },
+  star: {
+    title: "Star Characters",
+    profile: {
+      avatar: "", // e.g. "https://raw.githubusercontent.com/USER/REPO/main/star-avatar.png"
+      eyebrow: "Character Archive",
+      name: "StarSundae",
+      welcome: "Welcome to my character hub! Browse characters by folder, search by name or tags, and open individual profiles for references, lore, credits, favorites, and galleries.",
+      links: [
+        { icon: "⭐", label: "Characters", href: "#/star" },
+        { icon: "🎨", label: "Designs", href: "#" },
+        { icon: "📖", label: "Lore", href: "#" },
+        { icon: "🌎", label: "Worlds", href: "#" },
+      ],
+    },
+    nav: [
+      { icon: "🌎", label: "Worlds", href: "#" },
+      { icon: "💞", label: "Shared Hub", href: "#" },
+      { icon: "🌙", label: "My Wife", href: "#" },
+      { icon: "🎮", label: "Our Gaming OCs", href: "#" },
+      { icon: "💵", label: "Sales Hub", href: "#" },
+      { icon: "🖌️", label: "Star Sundae Commissions", href: "#" },
+      { icon: "✨", label: "Generators", href: "#" },
+    ],
+  },
 };
 
 const app = document.getElementById("app");
@@ -493,9 +608,42 @@ function renderPicker(){
   `;
 }
 
+/* ---------------- Profile hero + secondary nav (per-source) ---------------- */
+function renderProfileHero(profile){
+  if(!profile) return "";
+  return `
+    <div class="profile-hero">
+      ${profile.avatar ? `<div class="avatar"><img src="${escapeHtml(profile.avatar)}" alt="${escapeHtml(profile.name || "")}"></div>` : ""}
+      <div class="info">
+        ${profile.eyebrow ? `<div class="eyebrow">${escapeHtml(profile.eyebrow)}</div>` : ""}
+        ${profile.name ? `<h2>${escapeHtml(profile.name)}</h2>` : ""}
+        ${profile.welcome ? `<div class="welcome">${escapeHtml(profile.welcome)}</div>` : ""}
+        ${profile.links && profile.links.length ? `
+          <div class="profile-links">
+            ${profile.links.map(l => `<a href="${escapeHtml(l.href)}">${l.icon ? escapeHtml(l.icon) + " " : ""}${escapeHtml(l.label)}</a>`).join("")}
+          </div>` : ""}
+      </div>
+    </div>`;
+}
+
+function renderNavSection(navLinks){
+  if(!navLinks || navLinks.length === 0) return "";
+  return `
+    <div class="nav-section">
+      <h3>Navigation</h3>
+      <div class="nav-grid">
+        ${navLinks.map(l => `<a href="${escapeHtml(l.href)}">${l.icon ? escapeHtml(l.icon) + " " : ""}${escapeHtml(l.label)}</a>`).join("")}
+      </div>
+    </div>`;
+}
+
 /* ---------------- Landing page (per-source) ---------------- */
 async function renderLanding(sourceKey, title){
+  const source = SOURCES[sourceKey];
+
   app.innerHTML = `
+    ${renderProfileHero(source.profile)}
+    ${renderNavSection(source.nav)}
     <div class="archive-head">
       <h1>${escapeHtml(title)}</h1>
       <p>Every character, sorted into their drawer. Click a card to open the full file.</p>
