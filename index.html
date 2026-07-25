@@ -293,6 +293,117 @@
     margin-top: 6px;
   }
 
+  /* ---------------- Worlds browser ---------------- */
+  .world-search{
+    padding: 24px;
+    margin: 0 0 28px;
+    background: var(--glass);
+    backdrop-filter: blur(16px) saturate(140%);
+    -webkit-backdrop-filter: blur(16px) saturate(140%);
+    border: 1px solid var(--glass-border);
+    border-radius: var(--radius);
+  }
+  .world-search h3{
+    font-family: var(--font-display); font-size: 16px; font-weight: 700; margin: 0 0 4px; color: var(--ink);
+  }
+  .world-search p{ margin: 0 0 14px; font-size: 13px; color: var(--ink-soft); }
+  .world-search input{
+    width: 100%; max-width: 360px;
+    font-family: var(--font-body); font-size: 14px;
+    padding: 10px 16px; border-radius: 999px;
+    background: rgba(255,255,255,0.05); border: 1px solid var(--glass-border); color: var(--ink);
+  }
+  .world-search input::placeholder{ color: var(--ink-soft); }
+  .world-search input:focus{ outline: none; border-color: var(--accent); }
+
+  .world-grid{
+    display:grid; grid-template-columns: repeat(auto-fill, minmax(220px,1fr)); gap: 20px;
+  }
+  .world-card{
+    display:block;
+    background: var(--glass-strong);
+    backdrop-filter: blur(18px) saturate(140%);
+    -webkit-backdrop-filter: blur(18px) saturate(140%);
+    border: 1px solid var(--glass-border);
+    border-radius: var(--radius);
+    box-shadow: var(--card-shadow);
+    overflow: hidden;
+    transition: transform .2s ease, box-shadow .2s ease, border-color .2s ease;
+  }
+  .world-card:hover{ transform: translateY(-6px); box-shadow: 0 20px 40px -16px rgba(0,0,0,0.7); border-color: rgba(199,204,224,0.3); }
+  .world-card .banner{ aspect-ratio: 16/10; background: rgba(255,255,255,0.03); overflow:hidden; }
+  .world-card .banner img{ width:100%; height:100%; object-fit: cover; display:block; }
+  .world-card .body{ padding: 16px 18px 20px; }
+  .world-card .name{ font-family: var(--font-display); font-weight: 700; font-size: 18px; color: var(--ink); margin-bottom: 6px; }
+  .world-card .desc{ font-size: 13px; color: var(--ink-soft); line-height: 1.55; margin-bottom: 12px; }
+  .world-card .pill-row{ display:flex; flex-wrap: wrap; gap: 6px; margin-bottom: 12px; }
+  .world-card .pill-row .pill{
+    font-size: 11px; font-weight: 500; padding: 4px 11px; border-radius: 999px;
+    background: rgba(255,255,255,0.05); border: 1px solid var(--glass-border); color: var(--ink);
+  }
+  .world-card .view-link{ font-size: 13px; font-weight: 600; color: var(--accent); }
+
+  /* ---------------- World detail page ---------------- */
+  .world-hero{
+    border-radius: var(--radius); overflow: hidden; margin-bottom: 60px;
+    border: 1px solid var(--glass-border); box-shadow: var(--card-shadow);
+    position: relative;
+  }
+  .world-hero .banner{ aspect-ratio: 21/8; background: rgba(255,255,255,0.03); }
+  .world-hero .banner img{ width:100%; height:100%; object-fit: cover; display:block; }
+  .world-hero .id-card{
+    position: absolute; left: 24px; right: 24px; bottom: -48px;
+    display:flex; align-items:center; gap: 18px;
+    padding: 18px 24px;
+    background: var(--glass-strong);
+    backdrop-filter: blur(20px) saturate(140%);
+    -webkit-backdrop-filter: blur(20px) saturate(140%);
+    border: 1px solid var(--glass-border);
+    border-radius: var(--radius-sm);
+    box-shadow: var(--card-shadow);
+  }
+  .world-hero .id-card .icon{ width: 56px; height: 56px; border-radius: 50%; overflow:hidden; flex-shrink:0; background: rgba(255,255,255,0.05); border: 1px solid var(--glass-border); }
+  .world-hero .id-card .icon img{ width:100%; height:100%; object-fit: cover; }
+  .world-hero .id-card h1{ font-family: var(--font-display); font-size: clamp(20px,3vw,26px); font-weight: 700; margin: 0 0 2px; color: var(--ink); }
+  .world-hero .id-card .desc{ font-size: 13px; color: var(--ink-soft); }
+
+  .world-info{
+    display:flex; flex-wrap: wrap; gap: 28px; justify-content: space-between;
+    padding: 24px; margin-bottom: 24px;
+    background: var(--glass); border: 1px solid var(--glass-border); border-radius: var(--radius);
+  }
+  .world-info .group h4{
+    font-family: var(--font-mono); font-size: 10px; letter-spacing: .08em; text-transform: uppercase;
+    color: var(--ink-soft); margin: 0 0 8px; font-weight: 500;
+  }
+  .world-info .group .status-line{ font-size: 14px; color: var(--ink); margin-bottom: 4px; }
+  .world-info .group .pill-row{ display:flex; flex-wrap: wrap; gap: 6px; }
+  .world-info .group .pill-row .pill{
+    font-size: 11px; font-weight: 500; padding: 4px 11px; border-radius: 999px;
+    background: rgba(255,255,255,0.05); border: 1px solid var(--glass-border); color: var(--ink);
+  }
+
+  .world-char-summary{ font-size: 13px; color: var(--ink-soft); margin: -8px 0 18px; }
+  .world-char-grid{ display:grid; grid-template-columns: repeat(auto-fill, minmax(150px,1fr)); gap: 16px; }
+  .world-char-card{
+    background: rgba(255,255,255,0.035); border: 1px solid var(--glass-border);
+    border-radius: var(--radius-sm); overflow:hidden; text-align: center;
+    transition: transform .15s ease, border-color .15s ease;
+  }
+  .world-char-card:hover{ transform: translateY(-3px); border-color: rgba(199,204,224,0.25); }
+  .world-char-card .hub-tag{
+    font-family: var(--font-mono); font-size: 10px; letter-spacing: .04em;
+    padding: 6px 0; color: var(--accent);
+  }
+  .world-char-card .photo{ aspect-ratio: 4/5; background: rgba(255,255,255,0.03); }
+  .world-char-card .photo img{ width:100%; height:100%; object-fit:cover; display:block; }
+  .world-char-card .meta{ padding: 10px 12px 14px; }
+  .world-char-card .meta .name{ font-family: var(--font-display); font-weight:700; font-size:14px; color: var(--accent); }
+  .world-char-card .meta .species{ font-size: 11px; color: var(--ink-soft); margin-top: 3px; }
+  .world-char-card .meta .role{ font-size: 12px; font-weight: 600; color: var(--ink); margin-top: 2px; }
+
+  .world-actions{ display:flex; gap: 10px; justify-content:center; margin: 32px 0 8px; }
+
   /* ---------------- Character page ---------------- */
   .char-hero{
     display:flex; gap: 28px; align-items:flex-end; flex-wrap: wrap;
@@ -461,6 +572,7 @@
   <nav class="top-links" id="topNav">
     <a href="#/luna">Luna Characters</a>
     <a href="#/star">Star Characters</a>
+    <a href="#/worlds">Worlds</a>
     <a href="#/rp-rules">RP Rules</a>
     <a href="#/meet-the-owner">Meet the Owner</a>
   </nav>
@@ -503,11 +615,11 @@ const SOURCES = {
         { icon: "⭐", label: "Characters", href: "#/luna" },
         { icon: "🎨", label: "Designs", href: "#" },
         { icon: "📖", label: "Lore", href: "#" },
-        { icon: "🌎", label: "Worlds", href: "#" },
+        { icon: "🌎", label: "Worlds", href: "#/worlds" },
       ],
     },
     nav: [
-      { icon: "🌎", label: "Worlds", href: "#" },
+      { icon: "🌎", label: "Worlds", href: "#/worlds" },
       { icon: "💞", label: "Shared Hub", href: "#" },
     ],
   },
@@ -522,11 +634,11 @@ const SOURCES = {
         { icon: "⭐", label: "Characters", href: "#/star" },
         { icon: "🎨", label: "Designs", href: "#" },
         { icon: "📖", label: "Lore", href: "#" },
-        { icon: "🌎", label: "Worlds", href: "#" },
+        { icon: "🌎", label: "Worlds", href: "#/worlds" },
       ],
     },
     nav: [
-      { icon: "🌎", label: "Worlds", href: "#" },
+      { icon: "🌎", label: "Worlds", href: "#/worlds" },
       { icon: "💞", label: "Shared Hub", href: "#" },
       { icon: "🌙", label: "My Wife", href: "#" },
       { icon: "🎮", label: "Our Gaming OCs", href: "#" },
@@ -541,7 +653,9 @@ const app = document.getElementById("app");
 const topNav = document.getElementById("topNav");
 
 // cache per-source lists so navigating back doesn't re-fetch every time
-const cache = { bySource: {}, chars: new Map() };
+const cache = { bySource: {}, chars: new Map(), worldsList: null, worlds: new Map() };
+
+const HUB_ICON = { LunaHub: "🌙", StarHub: "⭐", SharedHub: "💞" };
 
 function escapeHtml(str){
   return String(str).replace(/[&<>"']/g, (c) => ({
@@ -576,6 +690,11 @@ function router(){
   } else if(SOURCES[route]){
     document.querySelector(`#topNav a[href="#/${route}"]`)?.classList.add("active");
     renderLanding(route, SOURCES[route].title);
+  } else if(route === "worlds"){
+    document.querySelector('#topNav a[href="#/worlds"]').classList.add("active");
+    renderWorldsList();
+  } else if(route === "world"){
+    renderWorldDetail(params.get("slug"));
   } else if(route === "rp-rules"){
     document.querySelector('#topNav a[href="#/rp-rules"]').classList.add("active");
     renderRpRules();
@@ -635,6 +754,212 @@ function renderNavSection(navLinks){
         ${navLinks.map(l => `<a href="${escapeHtml(l.href)}">${l.icon ? escapeHtml(l.icon) + " " : ""}${escapeHtml(l.label)}</a>`).join("")}
       </div>
     </div>`;
+}
+
+/* ---------------- Worlds browser (landing page for all worlds) ---------------- */
+async function renderWorldsList(){
+  app.innerHTML = `
+    <div class="archive-head">
+      <h1>🌎 Worlds</h1>
+      <p>Browse shared worlds, settings, AUs, and story spaces.</p>
+    </div>
+    <div class="world-search">
+      <h3>World Browser</h3>
+      <p>Search by world name, slug, genre, theme, era, status, or description.</p>
+      <input id="worldSearch" type="text" placeholder="Search worlds...">
+    </div>
+    <div id="worldGrid" class="loading">Pulling up the atlas…</div>
+  `;
+
+  try{
+    if(!cache.worldsList){
+      cache.worldsList = await apiGet(`/api/worlds`);
+    }
+    const worlds = cache.worldsList;
+
+    function paintWorlds(list){
+      const grid = document.getElementById("worldGrid");
+      if(list.length === 0){
+        grid.className = "";
+        grid.innerHTML = `<p class="empty-state">No worlds match that search.</p>`;
+        return;
+      }
+      grid.className = "world-grid";
+      grid.innerHTML = list.map((w) => `
+        <a class="world-card" href="#/world?slug=${encodeURIComponent(w.slug)}">
+          <div class="banner">${w.banner ? `<img src="${escapeHtml(w.banner)}" alt="${escapeHtml(w.name)}" loading="lazy">` : ""}</div>
+          <div class="body">
+            <div class="name">${escapeHtml(w.name)}</div>
+            ${w.shortDescription ? `<div class="desc">${escapeHtml(w.shortDescription)}</div>` : ""}
+            <div class="pill-row">
+              ${w.genre.map(g => `<span class="pill">${escapeHtml(g)}</span>`).join("")}
+              ${w.theme.map(t => `<span class="pill">${escapeHtml(t)}</span>`).join("")}
+            </div>
+            <div class="view-link">View World &rarr;</div>
+          </div>
+        </a>`).join("");
+    }
+
+    const searchInput = document.getElementById("worldSearch");
+    searchInput.addEventListener("input", () => {
+      const q = searchInput.value.trim().toLowerCase();
+      if(!q){ paintWorlds(worlds); return; }
+      const filtered = worlds.filter(w => {
+        const haystack = [w.name, w.slug, w.era, w.status, w.shortDescription, ...w.genre, ...w.theme]
+          .filter(Boolean).join(" ").toLowerCase();
+        return haystack.includes(q);
+      });
+      paintWorlds(filtered);
+    });
+
+    paintWorlds(worlds);
+  } catch(err){
+    document.getElementById("worldGrid").outerHTML = `<p class="error-state">Couldn't reach the atlas: ${escapeHtml(err.message)}</p>`;
+  }
+}
+
+/* ---------------- World detail page ---------------- */
+const WORLD_TABS = [
+  { id: "overview", label: "Overview", types: ["Overview"] },
+  { id: "culture", label: "Culture", types: ["Culture"] },
+  { id: "magic", label: "Magic System", types: ["Magic System"] },
+  { id: "tech", label: "Technology", types: ["Technology"] },
+  { id: "economy", label: "Economy", types: ["Economy"] },
+  { id: "trivia", label: "Trivia", types: ["Trivia"] },
+];
+
+async function renderWorldDetail(slug){
+  if(!slug){ app.innerHTML = `<p class="error-state">Missing world.</p>`; return; }
+  app.innerHTML = `<p class="loading">Opening the world file…</p>`;
+  document.getElementById("charCustomCss").textContent = "";
+
+  try{
+    let data = cache.worlds.get(slug);
+    if(!data){
+      data = await apiGet(`/api/world?slug=${encodeURIComponent(slug)}`);
+      cache.worlds.set(slug, data);
+    }
+
+    document.getElementById("charCustomCss").textContent = data.customCss || "";
+
+    const backButtons = `
+      <div class="world-actions">
+        <a class="btn" href="#/worlds">&larr; Back to Worlds</a>
+        <a class="btn" href="#/">&larr; Back to Hub</a>
+      </div>`;
+
+    app.innerHTML = `
+      <div class="world-page">
+        ${backButtons}
+        <div class="world-hero">
+          <div class="banner">${data.banner ? `<img src="${escapeHtml(data.banner)}" alt="${escapeHtml(data.name)}">` : ""}</div>
+          <div class="id-card">
+            ${data.icon ? `<div class="icon"><img src="${escapeHtml(data.icon)}" alt=""></div>` : ""}
+            <div>
+              <h1>${escapeHtml(data.name)}</h1>
+              ${data.shortDescription ? `<div class="desc">${escapeHtml(data.shortDescription)}</div>` : ""}
+            </div>
+          </div>
+        </div>
+
+        <div class="world-info">
+          <div class="group">
+            <h4>World Info</h4>
+            ${data.status ? `<div class="status-line">Status: ${escapeHtml(data.status)}</div>` : ""}
+            ${data.era ? `<div class="status-line">Era: ${escapeHtml(data.era)}</div>` : ""}
+          </div>
+          ${data.genre.length ? `
+          <div class="group">
+            <h4>Genre</h4>
+            <div class="pill-row">${data.genre.map(g => `<span class="pill">${escapeHtml(g)}</span>`).join("")}</div>
+          </div>` : ""}
+          ${data.theme.length ? `
+          <div class="group">
+            <h4>Theme</h4>
+            <div class="pill-row">${data.theme.map(t => `<span class="pill">${escapeHtml(t)}</span>`).join("")}</div>
+          </div>` : ""}
+        </div>
+
+        <div id="worldTabs" class="drawers"></div>
+        <div id="worldPanels"></div>
+
+        ${backButtons}
+      </div>
+    `;
+
+    const tabsEl = document.getElementById("worldTabs");
+    const panelsEl = document.getElementById("worldPanels");
+
+    const contentTabs = WORLD_TABS
+      .map(tab => ({ ...tab, block: data.textBlocks.find(b => tab.types.includes(b.type)) }))
+      .filter(tab => tab.block);
+
+    const hasGallery = data.gallery && data.gallery.length > 0;
+    const hasCharacters = data.characters && data.characters.length > 0;
+
+    const allTabs = [
+      ...contentTabs,
+      ...(hasGallery ? [{ id: "gallery", label: "Gallery" }] : []),
+      ...(hasCharacters ? [{ id: "characters", label: "Characters" }] : []),
+    ];
+
+    if(allTabs.length === 0){
+      tabsEl.remove();
+      panelsEl.innerHTML = `<p class="empty-state">No blocks filed for this world yet.</p>`;
+      return;
+    }
+
+    tabsEl.innerHTML = allTabs.map((tab, i) =>
+      `<button class="drawer-tab ${i===0 ? "active":""}" data-tab="${tab.id}">${escapeHtml(tab.label)}</button>`
+    ).join("");
+
+    panelsEl.innerHTML = allTabs.map((tab, i) => {
+      let inner = "";
+      if(tab.block){
+        inner = `<div class="prose">${escapeHtml(tab.block.text).replace(/\n/g,"<br>")}</div>`;
+      } else if(tab.id === "gallery"){
+        inner = `
+          <div class="gallery-grid">
+            ${data.gallery.map(img => `
+              <div class="gallery-item">
+                <img src="${escapeHtml(img.url)}" loading="lazy">
+                ${img.caption ? `<div class="img-caption">${escapeHtml(img.caption)}</div>` : ""}
+              </div>`).join("")}
+          </div>`;
+      } else if(tab.id === "characters"){
+        const counts = data.hubCounts;
+        inner = `
+          <div class="world-char-summary">${data.characters.length} character${data.characters.length === 1 ? "" : "s"} linked — ${counts.StarHub || 0} StarHub, ${counts.LunaHub || 0} LunaHub, ${counts.SharedHub || 0} SharedHub.</div>
+          <div class="world-char-grid">
+            ${data.characters.map(c => `
+              <a class="world-char-card" href="#/character?slug=${encodeURIComponent(c.slug)}">
+                <div class="hub-tag">${HUB_ICON[c.hub] || ""} ${escapeHtml(c.hub)}</div>
+                <div class="photo">${c.cardImage ? `<img src="${escapeHtml(c.cardImage)}" alt="${escapeHtml(c.name)}">` : ""}</div>
+                <div class="meta">
+                  <div class="name">${escapeHtml(c.name)}</div>
+                  ${c.species ? `<div class="species">${escapeHtml(c.species)}</div>` : ""}
+                  ${c.role ? `<div class="role">${escapeHtml(c.role)}</div>` : ""}
+                </div>
+              </a>`).join("")}
+          </div>`;
+      }
+      return `<div class="tab-panel" data-panel="${tab.id}" ${i===0 ? "" : "hidden"}>${inner}</div>`;
+    }).join("");
+
+    if(hasGallery) wireGalleryClicks(panelsEl);
+
+    tabsEl.addEventListener("click", (e) => {
+      const btn = e.target.closest(".drawer-tab");
+      if(!btn) return;
+      tabsEl.querySelectorAll(".drawer-tab").forEach(b => b.classList.remove("active"));
+      btn.classList.add("active");
+      panelsEl.querySelectorAll(".tab-panel").forEach(panel => {
+        panel.hidden = panel.dataset.panel !== btn.dataset.tab;
+      });
+    });
+  } catch(err){
+    app.innerHTML = `<p class="error-state">Couldn't open that world: ${escapeHtml(err.message)}</p>`;
+  }
 }
 
 /* ---------------- Landing page (per-source) ---------------- */
